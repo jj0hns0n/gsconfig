@@ -182,7 +182,11 @@ class Catalog(object):
       "Content-type": "application/zip",
       "Accept": "application/xml"
     }
-    zip = prepare_upload_bundle(name, data)
+    
+    if 'zipshp' in data:
+        zip = data['zipshp']
+    else:
+        zip = prepare_upload_bundle(name, data)
     message = open(zip).read()
     try:
       headers, response = self.http.request(ds_url, "PUT", message, headers)
