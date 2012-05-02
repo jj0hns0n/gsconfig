@@ -4,7 +4,9 @@ from geoserver.layer import Layer
 from geoserver.store import coveragestore_from_index, datastore_from_index, \
     DataStore, CoverageStore, UnsavedDataStore, UnsavedCoverageStore
 from geoserver.style import Style
-from geoserver.support import prepare_upload_bundle
+from geoserver.support import prepare_upload_bundle, xml_property
+from geoserver.settings import settings_from_index, Settings, \
+    wms_settings_from_index, WmsInfo
 from geoserver.layergroup import LayerGroup, UnsavedLayerGroup
 from geoserver.workspace import workspace_from_index, Workspace
 from os import unlink
@@ -34,6 +36,7 @@ class Catalog(object):
   """
   The GeoServer catalog represents all of the information in the GeoServer
   configuration.  This includes:
+  - The basic settings for the GeoServer
   - Stores of geospatial data
   - Resources, or individual coherent datasets within stores
   - Styles for resources
@@ -45,7 +48,15 @@ class Catalog(object):
   - Namespaces, which provide unique identifiers for resources
   """
 
-  def __init__(self, url, username="admin", password="geoserver"):
+  @property
+  def settings_url(self):
+    return "%s/settings.xml" % (self.service_url)
+
+  @property
+  def wms_settings_url(self):
+    return "%s/services/wms/settings.xml" % (self.service_url)
+
+  def __init__(self, url, username="root", password="geoserver"):
     self.service_url = url
     if self.service_url.endswith("/"):
         self.service_url = self.service_url.strip("/")
@@ -138,7 +149,22 @@ class Catalog(object):
     logger.debug("%s %s", obj.save_method, obj.href)
     response = self.http.request(url, obj.save_method, message, headers)
     self._cache.clear()
+    print response
     return response
+
+  def get_settings(self):
+    settings_element = self.get_xml(self.settings_url)
+    return settings_from_index(self, settings_element)
+
+  def set_settings(self, settings):
+    self.save(settings) 
+
+  def get_wms_settings(self):
+    wms_settings_element = self.get_xml(self.wms_settings_url)
+    return wms_settings_from_index(self, wms_settings_element)
+
+  def set_wms_settings(self, settings):
+    self.save(settings) 
 
   def get_store(self, name, workspace=None):
       #stores = [s for s in self.get_stores(workspace) if s.name == name]
