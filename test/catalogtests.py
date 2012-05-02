@@ -8,13 +8,40 @@ class CatalogTests(unittest.TestCase):
   def setUp(self):
     self.cat = Catalog("http://localhost:8080/geoserver/rest")
 
+  def testSettings(self):
+    settings_obj = self.cat.get_settings()
+
+    # This seems like a very dumb way to do this, but it works
+
+    jai = settings_obj.jai
+    jai.tilePriority = "99" 
+    settings_obj.dirty['jai'] = jai
+
+    coverageAccess = settings_obj.coverageAccess
+    coverageAccess.maxPoolSize = "10"
+    settings_obj.dirty['coverageAccess'] = coverageAccess
+
+    settings = settings_obj.settings
+    settings.numDecimals = "6"
+    settings.charset = "UTF-8"
+    settings_obj.dirty['settings'] = settings
+    
+    self.cat.set_settings(settings_obj)
+
+  def testWmsSettings(self):
+    wms_settings = self.cat.get_wms_settings()
+    wms_settings.name = "Developers WMS"
+    wms_settings.title = "Developers GeoServer WMS"
+    wms_settings.maintainer = "The Developer Himself"
+    wms_settings.keywords = ["these", "are", "test", "keywords"] 
+    wms_settings.metadata['jpegCompression'] = "50"
+    self.cat.set_wms_settings(wms_settings)
 
   def testWorkspaces(self):
     self.assertEqual(7, len(self.cat.get_workspaces()))
     # marking out test since geoserver default workspace is not consistent 
     # self.assertEqual("cite", self.cat.get_default_workspace().name)
     self.assertEqual("topp", self.cat.get_workspace("topp").name)
-
 
   def testStores(self):
     topp = self.cat.get_workspace("topp")
