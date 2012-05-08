@@ -26,7 +26,14 @@ class CatalogTests(unittest.TestCase):
     settings.charset = "UTF-8"
     settings_obj.dirty['settings'] = settings
     
-    self.cat.set_settings(settings_obj)
+    self.cat.save(settings_obj)
+
+  def testContact(self):
+    contact_obj = self.cat.get_contactinfo()
+    contact_obj.contactPerson = "Jeffrey Johnson"
+    contact_obj.contactEmail = "jjohnson@opengeo.org"
+    contact_obj.address = "148 Lafayette St. Penthouse"
+    self.cat.save(contact_obj)
 
   def testWmsSettings(self):
     wms_settings = self.cat.get_wms_settings()
@@ -35,7 +42,7 @@ class CatalogTests(unittest.TestCase):
     wms_settings.maintainer = "The Developer Himself"
     wms_settings.keywords = ["these", "are", "test", "keywords"] 
     wms_settings.metadata['jpegCompression'] = "50"
-    self.cat.set_wms_settings(wms_settings)
+    self.cat.save(wms_settings)
 
   def testWorkspaces(self):
     self.assertEqual(7, len(self.cat.get_workspaces()))
