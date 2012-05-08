@@ -44,114 +44,6 @@ def _write_settings(builder, settings):
         builder.end("verboseExceptions") 
     builder.end("settings")
 
-class _contact(object):
-    def __init__(self, contactPerson, contactOrganization, contactPosition, addressType, address, addressCity, addressState, addressPostalCode, addressCountry, contactVoice, contactFacsimile, contactEmail):
-        self.contactPerson = contactPerson
-        self.contactOrganization = contactOrganization
-        self.contactPosition = contactPosition
-        self.addressType = addressType
-        self.address = address
-        self.addressCity = addressCity
-        self.addressState = addressState
-        self.addressPostalCode = addressPostalCode
-        self.addressCountry = addressCountry
-        self.contactVoice = contactVoice
-        self.contactFacsimile = contactFacsimile
-        self.contactEmail = contactEmail
-
-def _read_contact(node):
-    contactPerson = node.find("contactPerson")
-    contactOrganization = node.find("contactOrganization")
-    contactPosition = node.find("contactPosition")
-    addressType = node.find("addressType")
-    address = node.find("address")
-    addressCity = node.find("addressCity")
-    addressState = node.find("addressState")
-    addressPostalCode = node.find("addressPostalCode")
-    addressCountry = node.fine("addressCountry")
-    contactVoice = node.fine("contactVoice")
-    contactFacsimile = node.find("contactFacsimile")
-    contactEmail = node.find("contactEmail")
-
-    if contactPerson is not None:
-        contactPerson = contactPerson.text
-    if contactOrganization is not None:
-        contactOrganization = contactOrganization.text
-    if contactPosition is not None:
-        contactPosition = contactPosition.text
-    if addressType is not None:
-        addressType = addressType.text
-    if address is not None:
-        address = address.text
-    if addressCity is not None:
-        addressCity = addressCity.text
-    if addressState is not None:
-        addressState = addressState.text
-    if  addressPostalCode is not None:
-        addressPostalCode = addressPostalCode.text
-    if addressCountry is not None:
-        addressCountry = addressCountry.text
-    if contactVoice is not None:
-        contactVoice = contactVoice.text
-    if contactFacsimile is not None:
-        contactFacsimile = contactFacsimile.text
-    if contactEmail is not None:
-        contactEmail = contactEmail.text
-    return _contact(contactPerson, contactOrganization, contactPosition, addressType, address, addressCity, addressState, addressPostalCode, addressCountry, contactVoice, contactFacsimile, contactEmail)
-
-def _write_contact(builder, contact):
-    builder.start("contact", dict())
-    if contact.contactPerson is not None:
-        builder.start("contactPerson", dict())
-        builder.data(contact.contactPerson)
-        builder.end("contactPerson")
-    if contact.contactOrganization is not None:
-        builder.start("contactOrganization", dict())
-        builder.data(contact.contactOrganization)
-        builder.end("contactOrganization")
-    if contact.contactPosition is not None:
-        builder.start("contactPosition", dict())
-        builder.data(contact.contactPosition)
-        builder.end("contactPosition")
-    if contact.addressType is not None:
-        builder.start("addressType", dict())
-        builder.data(contact.addressType)
-        builder.end("addressType")
-    if contact.address is not None:
-        builder.start("address", dict())
-        builder.data(contact.address)
-        builder.end("address")
-    if contact.addressCity is not None:
-        builder.start("addressCity", dict())
-        builder.data(contact.addressCity)
-        builder.end("addressCity")
-    if contact.addressState is not None:
-        builder.start("addressState", dict())
-        builder.data(contact.addressState)
-        builder.end("addressState")
-    if contact.addressPostalCode is not None:
-        builder.start("addressPostalCode", dict())
-        builder.data(contact.addressPostalCode)
-        builder.end("addressPostalCode")
-    if contact.addressCountry is not None:
-        builder.start("addressCountry", dict())
-        builder.data(contact.addressCountry)
-        builder.end("addressCountr")
-    if contact.contactVoice is not None:
-        builder.start("contactVoice", dict())
-        builder.data(contact.contactVoice)
-        builder.end("contactVoice")
-    if contact.contactFacsimile is not None:
-        builder.start("contactFacsimile", dict())
-        builder.data(contact.contactFacsimile)
-        builder.end("contactFacsimile")
-    if contact.contactEmail is not None:
-        builder.start("contactEmail", dict())
-        builder.data(contact.contactEmail)
-        builder.end("contactEmail")
-    builder.end("contact")
-
-
 class _jai(object):
     def __init__(self, allowInterpolation, recycling, tilePriority, tileThreads, memoryCapacity, memoryThreshold, imageIOCache, pngAcceleration, jpegAcceleration, allowNativeMosaic):
         self.allowInterpolation = allowInterpolation
@@ -312,7 +204,6 @@ class Settings(ResourceInfo):
         return "%s/settings.xml" % (self.catalog.service_url)
 
     settings = xml_property("settings", _read_settings)
-    contact = xml_property("contact", _read_contact)
     jai = xml_property("jai", _read_jai)
     coverageAccess = xml_property("coverageAccess", _read_coverageAccess)
     updateSequence = xml_property("updateSequence")
@@ -322,7 +213,6 @@ class Settings(ResourceInfo):
 
     writers = dict(
                 settings = _write_settings,
-                contact = _write_contact,
                 jai = _write_jai,
                 coverageAccess = _write_coverageAccess,
                 updateSequence = write_string("updateSequence"),
@@ -333,6 +223,53 @@ class Settings(ResourceInfo):
 
     def __repr__(self):
         return "settings @ %s" % (self.href)
+
+def contactinfo_from_index(catalog, node):
+    return Contact(catalog)
+
+class Contact(ResourceInfo):
+    resource_type = "contactinfo"
+    save_method = "PUT"
+    
+    def __init__(self, catalog):
+        super(Contact, self).__init__()
+        self.catalog = catalog
+
+    @property
+    def href(self):
+        return "%s/settings/contact.xml" % (self.catalog.service_url)
+
+    address = xml_property("address")
+    addressCity = xml_property("addressCity")
+    addressCountry = xml_property("addressCountry")
+    addressPostalCode = xml_property("addressPostalCode")
+    addressState = xml_property("addressState")
+    addressType = xml_property("addressType")
+    contactEmail = xml_property("contactEmail")
+    contactFacsimile = xml_property("contactFacsimile")
+    contactOrganization = xml_property("contactOrganization")
+    contactPerson = xml_property("contactPerson")
+    contactPosition = xml_property("contactPosition")
+    contactVoice = xml_property("contactVoice")
+
+    writers = dict(
+        address = write_string("address"),
+        addressCity = write_string("addressCity"),
+        addressCountry = write_string("addressCountry"),
+        addressPostalCode = write_string("addressPostalCode"),
+        addressState = write_string("addressState"),
+        addressType = write_string("addressType"),
+        contactEmail = write_string("contactEmail"),
+        contactFacsimile = write_string("contactFacsimile"),
+        contactOrganization = write_string("contactOrganization"),
+        contactPerson = write_string("contactPerson"),
+        contactPosition = write_string("contactPosition"),
+        contactVoice = write_string("contactVoice")
+    )
+
+    def __repr__(self):
+        return "contactinfo @ %s" % (self.href)
+
 
 def wms_settings_from_index(catalog, node):
     return WmsInfo(catalog)
