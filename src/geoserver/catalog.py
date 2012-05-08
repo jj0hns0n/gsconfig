@@ -5,8 +5,8 @@ from geoserver.store import coveragestore_from_index, datastore_from_index, \
     DataStore, CoverageStore, UnsavedDataStore, UnsavedCoverageStore
 from geoserver.style import Style
 from geoserver.support import prepare_upload_bundle, xml_property
-from geoserver.settings import settings_from_index, Settings, \
-    wms_settings_from_index, WmsInfo
+from geoserver.settings import settings_from_index, contactinfo_from_index, \
+    wms_settings_from_index
 from geoserver.layergroup import LayerGroup, UnsavedLayerGroup
 from geoserver.workspace import workspace_from_index, Workspace
 from os import unlink
@@ -51,6 +51,10 @@ class Catalog(object):
   @property
   def settings_url(self):
     return "%s/settings.xml" % (self.service_url)
+
+  @property
+  def contactinfo_url(self):
+    return "%s/settings/contact.xml" % (self.service_url)
 
   @property
   def wms_settings_url(self):
@@ -156,15 +160,13 @@ class Catalog(object):
     settings_element = self.get_xml(self.settings_url)
     return settings_from_index(self, settings_element)
 
-  def set_settings(self, settings):
-    self.save(settings) 
+  def get_contactinfo(self):
+    contactinfo_element = self.get_xml(self.contactinfo_url)
+    return contactinfo_from_index(self, contactinfo_element)
 
   def get_wms_settings(self):
     wms_settings_element = self.get_xml(self.wms_settings_url)
     return wms_settings_from_index(self, wms_settings_element)
-
-  def set_wms_settings(self, settings):
-    self.save(settings) 
 
   def get_store(self, name, workspace=None):
       #stores = [s for s in self.get_stores(workspace) if s.name == name]
