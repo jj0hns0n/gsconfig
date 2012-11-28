@@ -9,41 +9,41 @@ class CatalogTests(unittest.TestCase):
     def setUp(self):
         self.cat = Catalog("http://localhost:8080/geoserver/rest")
 
-  def testSettings(self):
-    settings_obj = self.cat.get_settings()
+    def testSettings(self):
+        settings_obj = self.cat.get_settings()
 
-    # This seems like a very dumb way to do this, but it works
+        # This seems like a very dumb way to do this, but it works
 
-    jai = settings_obj.jai
-    jai.tilePriority = "99" 
-    settings_obj.dirty['jai'] = jai
+        jai = settings_obj.jai
+        jai.tilePriority = "99" 
+        settings_obj.dirty['jai'] = jai
 
-    coverageAccess = settings_obj.coverageAccess
-    coverageAccess.maxPoolSize = "10"
-    settings_obj.dirty['coverageAccess'] = coverageAccess
+        coverageAccess = settings_obj.coverageAccess
+        coverageAccess.maxPoolSize = "10"
+        settings_obj.dirty['coverageAccess'] = coverageAccess
 
-    settings = settings_obj.settings
-    settings.numDecimals = "6"
-    settings.charset = "UTF-8"
-    settings_obj.dirty['settings'] = settings
+        settings = settings_obj.settings
+        settings.numDecimals = "6"
+        settings.charset = "UTF-8"
+        settings_obj.dirty['settings'] = settings
     
-    self.cat.save(settings_obj)
+        self.cat.save(settings_obj)
 
-  def testContact(self):
-    contact_obj = self.cat.get_contactinfo()
-    contact_obj.contactPerson = "Jeffrey Johnson"
-    contact_obj.contactEmail = "jjohnson@opengeo.org"
-    contact_obj.address = "148 Lafayette St. Penthouse"
-    self.cat.save(contact_obj)
-
-  def testWmsSettings(self):
-    wms_settings = self.cat.get_wms_settings()
-    wms_settings.name = "Developers WMS"
-    wms_settings.title = "Developers GeoServer WMS"
-    wms_settings.maintainer = "The Developer Himself"
-    wms_settings.keywords = ["these", "are", "test", "keywords"] 
-    wms_settings.metadata['jpegCompression'] = "50"
-    self.cat.save(wms_settings)
+    def testContact(self):
+        contact_obj = self.cat.get_contactinfo()
+        contact_obj.contactPerson = "Jeffrey Johnson"
+        contact_obj.contactEmail = "jjohnson@opengeo.org"
+        contact_obj.address = "148 Lafayette St. Penthouse"
+        self.cat.save(contact_obj)
+    
+    def testWmsSettings(self):
+        wms_settings = self.cat.get_wms_settings()
+        wms_settings.name = "Developers WMS"
+        wms_settings.title = "Developers GeoServer WMS"
+        wms_settings.maintainer = "The Developer Himself"
+        wms_settings.keywords = ["these", "are", "test", "keywords"] 
+        wms_settings.metadata['jpegCompression'] = "50"
+        self.cat.save(wms_settings)
 
     def testWorkspaces(self):
         self.assertEqual(7, len(self.cat.get_workspaces()))
