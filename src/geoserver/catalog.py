@@ -5,6 +5,8 @@ from geoserver.store import coveragestore_from_index, datastore_from_index, \
     UnsavedDataStore, UnsavedCoverageStore
 from geoserver.style import Style
 from geoserver.support import prepare_upload_bundle, url
+from geoserver.settings import settings_from_index, Settings, \
+    wms_settings_from_index, WmsInfo, contactinfo_from_index
 from geoserver.layergroup import LayerGroup, UnsavedLayerGroup
 from geoserver.workspace import workspace_from_index, Workspace
 from os import unlink
@@ -57,6 +59,18 @@ class Catalog(object):
         Layers
     - Namespaces, which provide unique identifiers for resources
     """
+
+    @property
+    def settings_url(self):
+        return "%s/settings.xml" % (self.service_url)
+
+    @property
+    def wms_settings_url(self):
+        return "%s/services/wms/settings.xml" % (self.service_url)
+
+    @property
+    def contactinfo_url(self):
+        return "%s/settings/contact.xml" % (self.service_url)
 
     def __init__(self, service_url, username="admin", password="geoserver", disable_ssl_certificate_validation=False):
         self.service_url = service_url
@@ -168,6 +182,24 @@ class Catalog(object):
             raise FailedRequestError("Error code (%s) from GeoServer: %s" %
                 (headers['status'], body))
         return response
+
+    def get_settings(self):
+        settings_element = self.get_xml(self.settings_url)
+        return settings_from_index(self, settings_element)
+
+    def get_contactinfo(self):
+        contactinfo_element = self.get_xml(self.contactinfo_url)
+        return contactinfo_from_index(self, contactinfo_element)
+
+    def set_settings(self, settings):
+        self.save(settings) 
+
+    def get_wms_settings(self):
+        wms_settings_element = self.get_xml(self.wms_settings_url)
+        return wms_settings_from_index(self, wms_settings_element)
+
+    def set_wms_settings(self, settings):
+        self.save(settings) 
 
     def get_store(self, name, workspace=None):
         #stores = [s for s in self.get_stores(workspace) if s.name == name]
