@@ -228,7 +228,7 @@ def contactinfo_from_index(catalog, node):
     return Contact(catalog)
 
 class Contact(ResourceInfo):
-    resource_type = "contactinfo"
+    resource_type = "contact"
     save_method = "PUT"
     
     def __init__(self, catalog):
@@ -275,7 +275,7 @@ def wms_settings_from_index(catalog, node):
     return WmsInfo(catalog)
 
 class WmsInfo(ResourceInfo):
-    resource_type = "wmsinfo"
+    resource_type = "wms"
     save_method = "PUT"
     
     def __init__(self, catalog):
