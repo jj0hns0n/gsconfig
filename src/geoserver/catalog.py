@@ -3,7 +3,8 @@ import logging
 from geoserver.layer import Layer
 from geoserver.resource import FeatureType, Coverage
 from geoserver.store import coveragestore_from_index, datastore_from_index, \
-    UnsavedDataStore, UnsavedCoverageStore
+    wmsstore_from_index, DataStore, CoverageStore, WmsStore, UnsavedDataStore,\
+    UnsavedCoverageStore, UnsavedWmsStore
 from geoserver.style import Style, Workspace_Style
 from geoserver.support import prepare_upload_bundle, url
 from geoserver.layergroup import LayerGroup, UnsavedLayerGroup
@@ -258,9 +259,11 @@ class Catalog(object):
                 workspace = self.get_workspace(workspace)
             ds_list = self.get_xml(workspace.datastore_url)
             cs_list = self.get_xml(workspace.coveragestore_url)
+            wms_list = self.get_xml(workspace.wmsstore_url)
             datastores = [datastore_from_index(self, workspace, n) for n in ds_list.findall("dataStore")]
             coveragestores = [coveragestore_from_index(self, workspace, n) for n in cs_list.findall("coverageStore")]
-            return datastores + coveragestores
+            wmsstores = [wmsstore_from_index(self, workspace, n) for n in wms_list.findall("wmsStore")]
+            return datastores + coveragestores + wmsstores
         else:
             stores = []
             for ws in self.get_workspaces():
@@ -285,6 +288,25 @@ class Catalog(object):
         elif workspace is None:
             workspace = self.get_default_workspace()
         return UnsavedCoverageStore(self, name, workspace)
+
+    def create_wmsstore(self, name, workspace = None, user = None, password = None):
+        if workspace is None:
+            workspace = self.get_default_workspace()
+        return UnsavedWmsStore(self, name, workspace, user, password)
+
+    def create_wmslayer(self, workspace, store, name):
+        headers = {
+            "Content-type": "text/xml",
+            "Accept": "application/xml"
+        }
+
+        wms_url = store.href.replace('.xml', '/wmslayers')
+        data = "<wmsLayer><name>%s</name></wmsLayer>" % name
+        headers, response = self.http.request(wms_url, "POST", data, headers)
+
+        self._cache.clear()
+        if headers.status < 200 or headers.status > 299: raise UploadError(response) 
+        return self.get_resource(name, store=store, workspace=workspace)
 
     def add_data_to_store(self, store, name, data, workspace=None, overwrite = False, charset = None):
         if isinstance(store, basestring):

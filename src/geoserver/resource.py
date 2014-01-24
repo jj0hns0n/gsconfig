@@ -44,6 +44,10 @@ def coverage_from_index(catalog, workspace, store, node):
     name = node.find("name")
     return Coverage(catalog, workspace, store, name.text)
 
+def wmslayer_from_index(catalog, workspace, store, node):
+    name = node.find("name")
+    return WmsLayer(catalog, workspace, store, name.text)
+
 class _ResourceBase(ResourceInfo):
     save_method = 'PUT'
 
@@ -195,3 +199,50 @@ class Coverage(_ResourceBase):
                 responseSRS = write_string_list("responseSRS"),
                 supportedFormats = write_string_list("supportedFormats")
             )
+
+class WmsLayer(ResourceInfo):
+    resource_type = "wmsLayer"
+    save_method = "PUT"
+    
+    def __init__(self, catalog, workspace, store, name):
+        super(WmsLayer, self).__init__()
+        self.catalog = catalog
+        self.workspace = workspace
+        self.store = store
+        self.name = name
+
+    @property
+    def href(self):
+        return "%s/workspaces/%s/wmsstores/%s/wmslayers/%s.xml" % (
+                self.catalog.service_url,
+                self.workspace.name,
+                self.store.name,
+                self.name
+                )
+
+
+    title = xml_property("title")
+    description = xml_property("description")
+    abstract = xml_property("abstract")
+    keywords = xml_property("keywords", string_list)
+    # nativeCRS
+    projection = xml_property("srs")
+    native_bbox = xml_property("nativeBoundingBox", bbox)
+    latlon_bbox = xml_property("latLonBoundingBox", bbox)
+    projection_policy = xml_property("projectionPolicy")
+    enabled = xml_property("enabled")
+    metadata_links = xml_property("metadataLinks", metadata_link_list)   
+ 
+    writers = dict(
+                title = write_string("title"),
+                description = write_string("description"),
+                abstract = write_string("abstract"),
+                keywords = write_string_list("keywords"),
+                # nativeCRS
+                projection = write_string("srs"),
+                nativeBoundingBox = write_bbox("nativeBoundingBox"),
+                latLonBoundingBox = write_bbox("latLonBoundingBox"),
+                projection_policy = write_string("projectionPolicy"),
+                enabled = write_bool("enabled"),
+                metadataLinks = write_metadata_link_list("metadataLinks")
+           )

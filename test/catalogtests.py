@@ -300,6 +300,26 @@ class ModifyingTests(unittest.TestCase):
         rs = self.cat.get_resource("Arc_Sample")
         self.assertEquals(set(rs.supported_formats), formats_after, str(rs.supported_formats))
 
+    def testWmsStoreCreate(self):
+        ws = self.cat.create_wmsstore("wmsstore_gsconfig")
+        ws.capabilitiesURL = "http://suite.opengeo.org/geoserver/ows?service=wms&version=1.1.1&request=GetCapabilities"
+        ws.type = "WMS"
+        self.cat.save(ws)
+     
+    def testWmsLayer(self):
+        self.cat.create_workspace("wmstest", "http://example.com/wmstest")
+        wmstest = self.cat.get_workspace("wmstest")
+        wmsstore = self.cat.create_wmsstore("wmsstore", wmstest)
+        wmsstore.capabilitiesURL = "http://suite.opengeo.org/geoserver/ows?service=wms&version=1.1.1&request=GetCapabilities"
+        wmsstore.type = "WMS"
+        self.cat.save(wmsstore)
+        wmsstore = self.cat.get_store("wmsstore")
+        self.assertEqual(1, len(self.cat.get_stores(wmstest)))
+        available_layers = wmsstore.get_resources(available=True)
+        for layer in available_layers:
+            new_layer = self.cat.create_wmslayer(wmstest, wmsstore, layer)
+        added_layers = wmsstore.get_resources()
+        self.assertEqual(len(available_layers), len(added_layers))
 
     def testFeatureTypeCreate(self):
         shapefile_plus_sidecars = shapefile_and_friends("test/data/states")
